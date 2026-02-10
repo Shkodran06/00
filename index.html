@@ -164,29 +164,30 @@ function removeWorker(id) {
 }
 
 /* ===== GENERAZIONE ROTAZIONI ===== */
-function generateSingleShift() {
+function generateRotations() {
+  const rot = parseInt(document.getElementById("rotations").value);
   const selectedIds = [...document.querySelectorAll("#presentList input:checked")]
     .map(i => parseInt(i.value));
 
-  const need = document.querySelector("input[name='need']:checked").value;
-
-  let people = workers
-    .filter(w => selectedIds.includes(w.id))
-    .map(w => ({
-      ...w,
-      fatigue: Math.random(),
-      assigned: false
-    }));
-
-  let out = "";
-
-  function take() {
-    const p = people
-      .filter(p => !p.assigned)
-      .sort((a, b) => a.fatigue - b.fatigue)[0];
-    if (p) p.assigned = true;
-    return p;
+  if (selectedIds.length === 0) {
+    alert("Seleziona almeno un lavoratore");
+    return;
   }
+
+  // coda iniziale
+  let queue = workers.filter(w => selectedIds.includes(w.id));
+
+  let text = "";
+
+  for (let r = 1; r <= rot; r++) {
+    text += `===== ROTAZIONE ${r} =====\n`;
+    const result = generateSingleShift(queue);
+    text += result.output + "\n\n";
+    queue = result.newQueue; // ⬅️ QUESTO È IL SEGRETO
+  }
+
+  document.getElementById("output").value = text;
+}
 
   /* ===== TRIAGE ===== */
   let p;
